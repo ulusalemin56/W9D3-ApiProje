@@ -8,10 +8,9 @@ import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
 import com.bumptech.glide.Glide
 import com.example.w9d3_apiproje.R
-import com.example.w9d3_apiproje.data.MarsResponse
 import com.example.w9d3_apiproje.data.MarsResponseItem
 
-class MarsPropertyAdapter(private val marsProperties: MarsResponse) :
+class MarsPropertyAdapter(private val marsProperties: List<MarsResponseItem>) :
     RecyclerView.Adapter<MarsPropertyAdapter.MarsPropertyViewHolder>() {
 
 
