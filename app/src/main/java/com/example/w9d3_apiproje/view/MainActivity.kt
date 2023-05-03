@@ -2,19 +2,18 @@ package com.example.w9d3_apiproje.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import android.widget.Button
-import android.widget.EditText
-import android.widget.Toast
 import androidx.activity.viewModels
+import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.example.w9d3_apiproje.view.adapters.MarsPropertyAdapter
 import com.example.w9d3_apiproje.R
 import com.example.w9d3_apiproje.data.MarsResponseItem
-import com.example.w9d3_apiproje.repo.MarsPropertyRepostory
+import com.example.w9d3_apiproje.repo.MarsPropertyRepository
+import com.example.w9d3_apiproje.view.factory.MainViewModelFactory
 
 class MainActivity : AppCompatActivity() {
 
-    private val viewModel: MainViewModel by viewModels()
+    private lateinit var viewModel: MainViewModel
 
     private lateinit var recyclerView: RecyclerView
 
@@ -22,12 +21,15 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        MarsPropertyRepostory.initializeDataBase(this)
-
-        viewModel.marsServiceCall()
+        val marsPropertyRepository = MarsPropertyRepository(this)
+        viewModel = ViewModelProvider(
+            this,
+            MainViewModelFactory(marsPropertyRepository)
+        )[MainViewModel::class.java]
 
         recyclerView = findViewById(R.id.recycler_view)
-        val buttonBuy = findViewById<Button>(R.id.buttonBuy)
+
+       /* val buttonBuy = findViewById<Button>(R.id.buttonBuy)
         val buttonRent = findViewById<Button>(R.id.buttonRent)
         val buttonPrice = findViewById<Button>(R.id.buttonPrice)
         val editText = findViewById<EditText>(R.id.editTextPrice)
@@ -46,13 +48,12 @@ class MainActivity : AppCompatActivity() {
                 viewModel.getFilterPrice(price.toInt())
             else
                 Toast.makeText(this, "Lütfen Rakam Belirtiniz", Toast.LENGTH_SHORT).show()
-        }
+        }*/
 
 
         viewModel.properties.observe(this) { marsResponse ->
 
             setUpRecyclerView(marsResponse)
-
 
         }
 
