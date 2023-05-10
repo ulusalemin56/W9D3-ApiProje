@@ -4,8 +4,10 @@ package com.example.w9d3_apiproje.view
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import com.example.w9d3_apiproje.data.MarsResponseItem
 import com.example.w9d3_apiproje.repo.MarsPropertyRepository
+import kotlinx.coroutines.launch
 
 class MainViewModel(private val marsPropertyRepository: MarsPropertyRepository) : ViewModel() {
 
@@ -19,9 +21,11 @@ class MainViewModel(private val marsPropertyRepository: MarsPropertyRepository) 
     }
 
     private fun fetchProperties() {
-        marsPropertyRepository.fetchProperties { properties->
-            _properties.postValue(properties)
+        viewModelScope.launch {
+            val responseItem = marsPropertyRepository.fetchProperties()
+            _properties.value = responseItem
         }
+
     }
 
 }
