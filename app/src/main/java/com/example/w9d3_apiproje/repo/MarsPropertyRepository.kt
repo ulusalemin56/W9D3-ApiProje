@@ -8,21 +8,15 @@ import com.example.w9d3_apiproje.db.MarsPropertyDao
 import com.example.w9d3_apiproje.db.MarsPropertyDataBase
 import com.example.w9d3_apiproje.util.NetworkUtil
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
-import retrofit2.Call
-import retrofit2.Callback
-import retrofit2.Response
-import retrofit2.awaitResponse
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.flowOn
 import java.lang.Exception
-import java.util.concurrent.ExecutorService
-import java.util.concurrent.Executors
 
 class MarsPropertyRepository(private val context: Context) {
     private val marsApiService = MarsApiService.create()
 
-    private lateinit var marsPropertyDao: MarsPropertyDao
-    private val executor: ExecutorService = Executors.newSingleThreadExecutor()
-
+    private var marsPropertyDao: MarsPropertyDao
 
     init {
         val marsPropertyDatabase = Room.databaseBuilder(
@@ -34,85 +28,38 @@ class MarsPropertyRepository(private val context: Context) {
         marsPropertyDao = marsPropertyDatabase.marsPropertyDao()
     }
 
-    suspend fun fetchProperties(): List<MarsResponseItem> {
-
-        return if (NetworkUtil.isInternetAvailable(context)) {
-            fetchFromService()
-        } else {
-            fetchFromDatabase()
-        }
-
+    fun fetchProperties(): Flow<List<MarsResponseItem>> {
+        return flow {
+            if (NetworkUtil.isInternetAvailable(context)) {
+                emit(fetchFromService())
+            } else {
+                emit(fetchFromDatabase())
+            }
+        }.flowOn(Dispatchers.IO)
     }
 
     private suspend fun fetchFromService(): List<MarsResponseItem> {
-        val response = marsApiService.getProperties().awaitResponse()
 
-        if (response.isSuccessful) {
-            val responseList = response.body()
+        val response = marsApiService.getProperties()
 
-            if (responseList != null) {
-                insertProperties(responseList)
-                return responseList
-            }
+        insertProperties(response)
 
-        }
-        return fetchFromDatabase()
-
-        /* marsApiService.getProperties().enqueue(object : Callback<List<MarsResponseItem>> {
-
-             override fun onResponse(
-                 call: Call<List<MarsResponseItem>>,
-                 response: Response<List<MarsResponseItem>>
-             ) {
-
-                 if (response.isSuccessful) {
-
-                     val responseList = response.body()
-                     if (responseList != null) {
-                         callback(responseList)
-                         insertProperties(responseList)
-                     }
-
-                 } else {
-                     fetchFromDatabase(callback)
-                 }
-             }
-
-             override fun onFailure(call: Call<List<MarsResponseItem>>, t: Throwable) {
-                 fetchFromDatabase(callback)
-             }
-
-         })*/
+        return response
     }
 
     private suspend fun fetchFromDatabase(): List<MarsResponseItem> {
 
-        return withContext(Dispatchers.IO) {
-            marsPropertyDao.getAllProperties()
-        }
-        /* executor.execute {
-             val marsProperties = marsPropertyDao.getAllProperties()
-         }*/
+        return marsPropertyDao.getAllProperties()
+
     }
 
     private suspend fun insertProperties(properties: List<MarsResponseItem>) {
 
-        withContext(Dispatchers.IO) {
-            try {
-                marsPropertyDao.insertProperties(properties)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-
+        try {
+            marsPropertyDao.insertProperties(properties)
+        } catch (e: Exception) {
+            e.printStackTrace()
         }
-
-        /*executor.execute {
-            try {
-                marsPropertyDao.insertProperties(properties)
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }*/
 
     }
 

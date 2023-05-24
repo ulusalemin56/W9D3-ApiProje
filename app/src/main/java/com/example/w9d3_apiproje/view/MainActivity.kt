@@ -2,7 +2,6 @@ package com.example.w9d3_apiproje.view
 
 import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
-import androidx.activity.viewModels
 import androidx.lifecycle.ViewModelProvider
 import androidx.recyclerview.widget.RecyclerView
 import com.example.w9d3_apiproje.view.adapters.MarsPropertyAdapter
@@ -28,27 +27,6 @@ class MainActivity : AppCompatActivity() {
         )[MainViewModel::class.java]
 
         recyclerView = findViewById(R.id.recycler_view)
-
-       /* val buttonBuy = findViewById<Button>(R.id.buttonBuy)
-        val buttonRent = findViewById<Button>(R.id.buttonRent)
-        val buttonPrice = findViewById<Button>(R.id.buttonPrice)
-        val editText = findViewById<EditText>(R.id.editTextPrice)
-
-        buttonBuy.setOnClickListener {
-            viewModel.getFilterServiceCall("buy")
-        }
-
-        buttonRent.setOnClickListener {
-            viewModel.getFilterServiceCall("rent")
-        }
-
-        buttonPrice.setOnClickListener {
-            val price = editText.text.toString()
-            if (price.isNotEmpty())
-                viewModel.getFilterPrice(price.toInt())
-            else
-                Toast.makeText(this, "Lütfen Rakam Belirtiniz", Toast.LENGTH_SHORT).show()
-        }*/
 
 
         viewModel.properties.observe(this) { marsResponse ->
